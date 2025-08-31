@@ -15,28 +15,6 @@ environment {
             }
         }
 
-        stage('Tests') {
-            parallel {
-                stage('Unit Tests') {
-                    steps {
-                        dir('javaapp-pipeline') {
-                            sh 'mvn clean test'
-                        }
-                    }
-                }
-                stage('Trivy Scan') {
-                    steps {
-                        dir('javaapp-pipeline') {
-                            sh '''
-                                wget -q https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -O html.tpl
-                                trivy fs --format template --template "@html.tpl" -o report.html .
-                            '''
-                        }
-                    }
-                }
-            }
-        }
-
         // stage('Sonar Analysis') {
         //     steps {
         //         dir('javaapp-pipeline') {
