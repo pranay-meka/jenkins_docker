@@ -15,22 +15,13 @@ environment {
             }
         }
 
-        stage('Trivy Scan') {
-                steps {
-                    dir('javaapp-pipeline') {
-                         sh '''
-                            wget -q https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -O html.tpl
-                             trivy fs --format template --template "@html.tpl" -o report.html .
-                        '''
-                    }
-                }
-            }
+      
         stage('Build and Scan') {
             steps {
                 dir('javaapp-pipeline') {
                     sh '''
                     docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
-                    trivy image --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
+                    trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
                     '''
                 }
             }
@@ -55,5 +46,9 @@ environment {
                 }
             }
         }
-
+        post {
+      always {
+        cleanWs()
+      }
+        }
     }
