@@ -55,7 +55,7 @@ environment {
             steps {
                 dir('javaapp-pipeline') {
                     sh 'mvn clean package'
-                    sh docker build -t $DOCKER_IMAGE_NAME:$IMAGE_TAG .
+                    sh docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
                 }
             }
         }
