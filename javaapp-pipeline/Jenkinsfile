@@ -37,7 +37,7 @@ environment {
                 dir('javaapp-pipeline') {
                     // snyk auth ${SNYK_TOKEN}
                     sh'''
-                       snyk auth ${SNYK_TOKEN}
+                       
                         snyk container test jenkins-test:${IMAGE_TAG} --file=Dockerfile --severity-threshold=critical
                     '''
                 }
