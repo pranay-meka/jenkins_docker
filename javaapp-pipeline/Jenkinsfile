@@ -35,9 +35,17 @@ environment {
         stage('Scan') {
             steps {
                 dir('javaapp-pipeline') {
+                    script{
+                        snykSecurity severity: 'critical', snykInstallation: 'snyk-i', snykTokenId: 'snyk-api-token'
+                        def variable = sh(script: 'snyk container test jenkins-test --severity-threshold=critical', returnStatus: true)
+                       echo "error code = ${variable}"
+                        if (variable != 0) {
+                            echo "Alert for vulnerability found"
+                        } 
+                    }
                     //sh 'snyk auth ${SNYK_TOKEN}'
                     //sh 'snykSecurity(snykInstallation: 'snyk', snykTokenId: 'snyk-api-token', --docker: 'jenkins-test:latest', monitorProjectOnBuild: true, severity: 'high' )'
-                    snykSecurity ( dockerImageName: 'jenkins-test', severity: 'critical', snykInstallation: 'snyk-i', snykTokenId: 'snyk-api-token' )
+                    //snykSecurity ( dockerImageName: 'jenkins-test', severity: 'critical', snykInstallation: 'snyk-i', snykTokenId: 'snyk-api-token' )
                     //sh 'snykSecurity severity: 'critical', snykTokenId: 'snyk_token''
                     //sh 'snyk auth ${ST}'
                     //sh  'snyk container test jenkins-test:${IMAGE_TAG} --file=Dockerfile --severity-threshold=critical'
