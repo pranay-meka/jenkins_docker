@@ -40,7 +40,9 @@ environment {
                     //sh 'snyk auth ${ST}'
                     //sh  'snyk container test jenkins-test:${IMAGE_TAG} --file=Dockerfile --severity-threshold=critical'
                    // snykSecurity failOnError: false, severity: 'critical', snykTokenId: 'snyk-token'
-                    sh 'snyk test --docker jenkins-test:latest'
+                    //sh 'snyk test --docker jenkins-test:latest'
+                    sh 'snyk container test jenkins-test:latest --severity-threshold=critical'
+
                 }
             }
         }
