@@ -37,8 +37,7 @@ environment {
                 dir('javaapp-pipeline') {
                     sh'''
                     snyk auth ${SNYK_TOKEN}
-                        # Fail the build if any vulnerabilities >= 'critical' are found
-                        snyk container test $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$REPO_NAME:${IMAGE_TAG} --file=Dockerfile --severity-threshold=critical
+                        snyk container test jenkins-test:${IMAGE_TAG} --file=Dockerfile --severity-threshold=critical
                     '''
                 }
             }
