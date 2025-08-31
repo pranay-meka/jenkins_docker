@@ -9,6 +9,7 @@ environment {
         AWS_DEFAULT_REGION = "ap-south-1"   // Change to your region
         AWS_ACCOUNT_ID     = "995757496665" // Your AWS Account ID
         REPO_NAME          = "jenkins-test" // Your ECR repo name
+        SNYK_TOKEN = credentials('snyk_token')
     }
     
     stages {
@@ -19,15 +20,26 @@ environment {
         }
 
       
-        stage('Build and Scan') {
+        stage('Build') {
             steps {
                 dir('javaapp-pipeline') {
                     
                     // docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
                     sh 'docker build -t jenkins-test .'
                     sh 'docker tag jenkins-test:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$REPO_NAME:$IMAGE_TAG'
-                    // trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
-                    
+                    // trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}                    
+                }
+            }
+        }
+
+        stage('Scan') {
+            steps {
+                dir('javaapp-pipeline') {
+                    sh'''
+                    snyk auth ${SNYK_TOKEN}
+                        # Fail the build if any vulnerabilities >= 'critical' are found
+                        snyk container test $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$REPO_NAME:${IMAGE_TAG} --file=Dockerfile --severity-threshold=critical
+                    '''
                 }
             }
         }
@@ -49,7 +61,7 @@ environment {
             steps {
                   sh 'docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/${REPO_NAME}:${IMAGE_TAG}'
          //       sh 'docker pull ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}'
-                sh 'docker run -itd -p 5000:5000 ${REPO_NAME}:${IMAGE_TAG}'
+                  sh 'docker run -itd -p 5000:5000 ${REPO_NAME}:${IMAGE_TAG}'
                 }
             }
        // }
