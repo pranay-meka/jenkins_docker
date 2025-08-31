@@ -1,10 +1,17 @@
 pipeline {
-    agent {label 'agent'}
+    agent {label 'docker'}
 
+
+environment {
+        DOCKER_IMAGE_NAME = "pranayme/jenkins_test"
+        DOCKER_HUB_CREDENTIALS = "Docker_user"   // DockerHub creds ID in Jenkins
+        IMAGE_TAG = "latest" // Or use a dynamic tag like "${env.BUILD_NUMBER}"
+    }
+    
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/artisantek/jenkins.git'
+                git url: 'https://github.com/pranay-meka/jenkins_docker.git'
             }
         }
 
@@ -48,6 +55,7 @@ pipeline {
             steps {
                 dir('javaapp-pipeline') {
                     sh 'mvn clean package'
+                    sh docker build -t $DOCKER_IMAGE_NAME:$IMAGE_TAG .
                 }
             }
         }
@@ -55,56 +63,28 @@ pipeline {
         stage('Publish') {
             steps {
                 script {
-                    def GROUP_ID = sh(script: "mvn help:evaluate -Dexpression=project.groupId -q -DforceStdout -f javaapp-pipeline/pom.xml", returnStdout: true).trim()
-                    def ARTIFACT_ID = sh(script: "mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout -f javaapp-pipeline/pom.xml", returnStdout: true).trim()
-                    def VERSION = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout -f javaapp-pipeline/pom.xml", returnStdout: true).trim()
-                    def GROUP_PATH = sh(script: "echo '${GROUP_ID}' | tr '.' '/'", returnStdout: true).trim()
-                    def TARGET_PATH = "maven/${GROUP_PATH}/${ARTIFACT_ID}/${VERSION}/"
-                    def JAR_PATH = "${ARTIFACT_ID}-${VERSION}.jar"
-        
-                    dir('javaapp-pipeline/target') {
-                        rtUpload(
-                            serverId: 'jfrog',
-                            spec: """{
-                                "files": [
-                                    {
-                                        "pattern": "${JAR_PATH}",
-                                        "target": "${TARGET_PATH}"
-                                    }
-                                ]
-                            }"""
-                        )
+                    docker.withRegistry('https://registry.hub.docker.com', "${DOCKER_HUB_CREDENTIALS}") {
+                        app.push("${env.BUILD_NUMBER}")
+                        app.push("latest")
+                    }
+                    //script {
+                    //withCredentials([usernamePassword(credentialsId: env.DOCKER_HUB_CREDENTIALS, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        //sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                       // sh "docker push ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
+                       // sh "docker logout"
+                   // }
+                }
                     }
                 }
-            }
-        }
 
-        stage('Deploy') {
+        stage('Pull and Deploy') {
             steps {
-                dir('javaapp-pipeline/target') {
-                    sh '''
-                        if pgrep -f "java -jar java-sample-21-1.0.0.jar" > /dev/null; then
-                            pkill -f "java -jar java-sample-21-1.0.0.jar"
-                            echo "App was running and has been killed."
-                        else
-                            echo "App is not running."
-                        fi
-                        JENKINS_NODE_COOKIE=dontKillMe nohup java -jar java-sample-21-1.0.0.jar > app.log 2>&1 &
-                    '''
+                sh "docker pull ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
+                sh "docker run -itd -p 5000:5000 ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
                 }
             }
         }
 
     }
     
-    post {
-      always {
-        cleanWs()
-      }
-      failure {
-        emailext attachLog: true, body: 'Pipeline Failed, Please check the logs', subject: 'Job Failed', to: 'artisantek.adithya@gmail.com'
-      }
-    }
-
-
 }
