@@ -15,24 +15,37 @@ environment {
             }
         }
 
-        // stage('Sonar Analysis') {
-        //     steps {
-        //         dir('javaapp-pipeline') {
-        //             withSonarQubeEnv('sonar') {
-        //                 sh '''
-        //                     mvn clean verify sonar:sonar \
-        //                     -Dsonar.projectKey=java-app \
-        //                     -Dsonar.projectName=java-app 
-        //                 '''
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Sonar Analysis') {
+           steps {
+                 dir('javaapp-pipeline') {
+                     withSonarQubeEnv('sonar') {
+                         sh '''
+                             mvn clean verify sonar:sonar \
+                             -Dsonar.projectKey=java-app \
+                             -Dsonar.projectName=java-app 
+                         '''
+                     }
+                 }
+             }
+         }
 
-        stage('Build') {
+        stage('Trivy Scan') {
+                steps {
+                    dir('javaapp-pipeline') {
+                         sh '''
+                            wget -q https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -O html.tpl
+                             trivy fs --format template --template "@html.tpl" -o report.html .
+                        '''
+                    }
+                }
+            }
+        stage('Build and Scan') {
             steps {
                 dir('javaapp-pipeline') {
-                    sh 'docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .'
+                    sh '''
+                    docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
+                    trivy image --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
+                    '''
                 }
             }
         }
