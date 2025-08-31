@@ -15,20 +15,6 @@ environment {
             }
         }
 
-        stage('Sonar Analysis') {
-           steps {
-                 dir('javaapp-pipeline') {
-                     withSonarQubeEnv('sonar') {
-                         sh '''
-                             mvn clean verify sonar:sonar \
-                             -Dsonar.projectKey=java-app \
-                             -Dsonar.projectName=java-app 
-                         '''
-                     }
-                 }
-             }
-         }
-
         stage('Trivy Scan') {
                 steps {
                     dir('javaapp-pipeline') {
