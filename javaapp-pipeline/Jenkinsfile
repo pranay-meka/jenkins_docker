@@ -9,7 +9,7 @@ environment {
         AWS_DEFAULT_REGION = "ap-south-1"   // Change to your region
         AWS_ACCOUNT_ID     = "995757496665" // Your AWS Account ID
         REPO_NAME          = "jenkins-test" // Your ECR repo name
-        SNYK_TOKEN = credential('snyk_token')
+        SNYK_TOKEN = "snyk_token"
     }
     
     stages {
@@ -34,10 +34,11 @@ environment {
 
         stage('Scan') {
             steps {
+                withCredentials([Password(credentialsId: env.SNYK_TOKEN, passwordVariable: 'ST')])
                 dir('javaapp-pipeline') {
                     // snyk auth ${SNYK_TOKEN}
                     sh'''
-                        snyk auth ${SNYK_TOKEN}
+                        snyk auth ${ST}
                         snyk container test jenkins-test:${IMAGE_TAG} --file=Dockerfile --severity-threshold=critical
                     '''
                 }
