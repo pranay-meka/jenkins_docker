@@ -9,7 +9,7 @@ environment {
         AWS_DEFAULT_REGION = "ap-south-1"   // Change to your region
         AWS_ACCOUNT_ID     = "995757496665" // Your AWS Account ID
         REPO_NAME          = "jenkins-test" // Your ECR repo name
-        SNYK_TOKEN = 'snyk_token'
+        SNYK_TOKEN = credentials('snyk-token')
     }
     
     stages {
