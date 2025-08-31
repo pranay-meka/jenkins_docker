@@ -6,6 +6,10 @@ environment {
         DOCKER_IMAGE_NAME = "pranayme/jenkins_test"
         DOCKER_HUB_CREDENTIALS = "Docker_user"   // DockerHub creds ID in Jenkins
         IMAGE_TAG = "latest" // Or use a dynamic tag like "${env.BUILD_NUMBER}"
+        AWS_DEFAULT_REGION = "ap-south-1"   // Change to your region
+        AWS_ACCOUNT_ID     = "995757496665" // Your AWS Account ID
+        REPO_NAME          = "jenkins-test" // Your ECR repo name
+        IMAGE_TAG          = "${BUILD_NUMBER}"
     }
     
     stages {
@@ -20,8 +24,10 @@ environment {
             steps {
                 dir('javaapp-pipeline') {
                     sh '''
-                    docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
-                    trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
+                    // docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
+                    docker build -t jenkins-test .
+                    docker tag jenkins-test:latest $AWS_ACCOUNT_I.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$REPO_NAME:latest
+                    // trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
                     '''
                 }
             }
@@ -31,21 +37,22 @@ environment {
             steps {
                script {
                     withCredentials([usernamePassword(credentialsId: env.DOCKER_HUB_CREDENTIALS, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
-                    sh "docker push ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
-                    sh "docker logout"
+                    //sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                    //sh "docker push ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
+                    //sh "docker logout"
+                    sh docker push 995757496665.dkr.ecr.ap-south-1.amazonaws.com/jenkins-test:latest
                     }
                 }
                     }
                 }
 
-        stage('Pull and Deploy') {
-            steps {
-                sh 'docker pull ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}'
-                sh 'docker run -itd -p 5000:5000 ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}'
-                }
-            }
-        }
+        //stage('Pull and Deploy') {
+        //    steps {
+         //       sh 'docker pull ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}'
+         //       sh 'docker run -itd -p 5000:5000 ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}'
+        //        }
+        //    }
+       // }
         post {
       always {
         cleanWs()
