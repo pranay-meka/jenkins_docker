@@ -37,7 +37,7 @@ environment {
                 dir('javaapp-pipeline') {
                     script{
                         snykSecurity severity: 'critical', snykInstallation: 'snyk-i', snykTokenId: 'snyk-api-token'
-                        def variable = sh(script: 'snyk container test jenkins-test --severity-threshold=critical', returnStatus: true)
+                        def variable = sh(script: 'snyk container test jenkins-test --file=Dockerfile --severity-threshold=critical', returnStatus: true)
                        echo "error code = ${variable}"
                         if (variable != 0) {
                             echo "Alert for vulnerability found"
