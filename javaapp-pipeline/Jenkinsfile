@@ -39,17 +39,12 @@ environment {
 
         stage('Publish') {
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', "${DOCKER_HUB_CREDENTIALS}") {
-                        app.push("${env.BUILD_NUMBER}")
-                        app.push("latest")
+               script {
+                    withCredentials([usernamePassword(credentialsId: env.DOCKER_HUB_CREDENTIALS, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                    sh "docker push ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker logout"
                     }
-                    //script {
-                    //withCredentials([usernamePassword(credentialsId: env.DOCKER_HUB_CREDENTIALS, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        //sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
-                       // sh "docker push ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
-                       // sh "docker logout"
-                   // }
                 }
                     }
                 }
