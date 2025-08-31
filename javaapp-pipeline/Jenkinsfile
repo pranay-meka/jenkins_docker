@@ -26,8 +26,6 @@ environment {
                     
                     // docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
                     sh 'docker build -t jenkins-test .'
-                    sh 'snyk auth ${SNYK_TOKEN}'
-                    sh 'snyk container test jenkins-test:latest --severity-threshold=critical'
                     sh 'docker tag jenkins-test:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$REPO_NAME:$IMAGE_TAG'
                     // trivy image --scanners vuln --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}                    
                 }
@@ -36,15 +34,17 @@ environment {
 
         stage('Scan') {
             steps {
+                withCredentials([usernamePassword(credentialsId: env.DOCKER_HUB_CREDENTIALS, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                 dir('javaapp-pipeline') {
-                    //sh 'snyk auth ${SNYK_TOKEN}'
+                    sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                    sh 'snyk auth ${SNYK_TOKEN}'
                     //sh 'snykSecurity severity: 'critical', snykTokenId: 'snyk_token''
                     //sh 'snyk auth ${ST}'
                     //sh  'snyk container test jenkins-test:${IMAGE_TAG} --file=Dockerfile --severity-threshold=critical'
                    // snykSecurity failOnError: false, severity: 'critical', snykTokenId: 'snyk-token'
                     //sh 'snyk test --docker jenkins-test:latest'
-                    //sh 'snyk container test jenkins-test:latest --severity-threshold=critical'
-
+                    sh 'snyk container test jenkins-test:latest --severity-threshold=critical'
+                }
                 }
             }
         }
