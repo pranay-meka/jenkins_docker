@@ -34,10 +34,11 @@ environment {
 
         stage('Scan') {
             steps {
-                withCredentials([Password(credentialsId: env.SNYK_TOKEN, passwordVariable: 'ST')])
+                withCredentials([snyk(credentialsId: env.SNYK_TOKEN, passwordVariable: 'ST')])
                 dir('javaapp-pipeline') {
                     // snyk auth ${SNYK_TOKEN}
                     sh'''
+                    snykSecurity severity: 'critical', snykTokenId: 'snyk_token'
                         snyk auth ${ST}
                         snyk container test jenkins-test:${IMAGE_TAG} --file=Dockerfile --severity-threshold=critical
                     '''
