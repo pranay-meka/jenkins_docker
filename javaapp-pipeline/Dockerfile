@@ -1,4 +1,4 @@
-FROM ubuntu:26.10                                                                                                             
+FROM ubuntu                                                                                                             
 RUN apt update -y                                                                
 RUN apt install git maven -y                                                     
 RUN git clone https://github.com/artisantek/jenkins.git                          
