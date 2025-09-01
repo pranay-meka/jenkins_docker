@@ -10,7 +10,6 @@ environment {
         AWS_ACCOUNT_ID     = "995757496665" // Your AWS Account ID
         REPO_NAME          = "jenkins-test" // Your ECR repo name
        // SNYK_TOKEN = credentials('snyk-api-token')
-        SONARQUBE = 'MySonarQube'
     }
     
     stages {
@@ -36,10 +35,11 @@ environment {
         stage('SonarQube') {
             steps {
                 dir('javaapp-pipeline') {
-                withSonarQubeEnv('MySonarQube') {
+                withSonarQubeEnv('sonar') {
                     sh """
                         sonar-scanner \
                           -Dsonar.projectKey=jenkins_docker-test \
+                          -Dsonar.projectName=java-app \
                           -Dsonar.sources=. \
                           -Dsonar.inclusions=Dockerfile \
                           -Dsonar.login=$Sonar_token
