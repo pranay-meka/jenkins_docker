@@ -37,7 +37,7 @@ environment {
                 dir('javaapp-pipeline') {
                 withSonarQubeEnv('sonar') {
                     sh '''
-                           sonar-scanner \
+                           mvn verify sonar:sonar \
                           -Dsonar.projectKey=jenkins_docker-test \
                           -Dsonar.projectName=jenkins_docker-test \
                           -Dsonar.sources=. \
