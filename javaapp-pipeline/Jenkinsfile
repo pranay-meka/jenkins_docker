@@ -37,12 +37,12 @@ environment {
                 dir('javaapp-pipeline') {
                 withSonarQubeEnv('sonar') {
                     sh '''
+                           
                           -Dsonar.projectKey=jenkins_docker-test \
                           -Dsonar.projectName=jenkins_docker-test \
+                          -Dsonar.sources=. \
                           -Dsonar.inclusions=Dockerfile \
-                          
                     '''
-                    //-Dsonar.login=$Sonar_token
                 }
                 }
             }
