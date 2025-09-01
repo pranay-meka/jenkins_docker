@@ -42,8 +42,9 @@ environment {
                           -Dsonar.projectName=java-app \
                           -Dsonar.sources=. \
                           -Dsonar.inclusions=Dockerfile \
-                          -Dsonar.login=$Sonar_token
+                          
                     """
+                    //-Dsonar.login=$Sonar_token
                 }
                 }
             }
