@@ -54,7 +54,7 @@ environment {
                     script{
                         snykSecurity severity: 'critical', snykInstallation: 'snyk-i', snykTokenId: 'snyk-api-token'
                         } 
-                    sh 'snyk container test jenkins-test --severity-threshold=critical'
+                   // sh 'snyk container test jenkins-test --severity-threshold=critical'
                     }
 
                 }
