@@ -7,7 +7,7 @@ environment {
         DOCKER_HUB_CREDENTIALS = "Docker_user"   // DockerHub creds ID in Jenkins
         IMAGE_TAG = "latest" // Or use a dynamic tag like "${env.BUILD_NUMBER}"
         AWS_DEFAULT_REGION = "ap-south-1"   // Change to your region
-        AWS_ACCOUNT_ID     = "AWS_account" // Your AWS Account ID
+        AWS_ACCOUNT_ID     = credentials('AWS_account') // Your AWS Account ID
         REPO_NAME          = "jenkins-test" // Your ECR repo name
        // SNYK_TOKEN = credentials('snyk-api-token')
     }
