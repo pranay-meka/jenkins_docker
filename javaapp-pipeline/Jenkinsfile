@@ -53,6 +53,7 @@ environment {
                 dir('javaapp-pipeline') {
                     script{
                         snykSecurity severity: 'critical', snykInstallation: 'snyk-i', snykTokenId: 'snyk-api-token'
+                        snyk container test jenkins-test --severity-threshold=critical
                         } 
                     }
 
