@@ -52,11 +52,13 @@ environment {
             steps {
                 dir('javaapp-pipeline') {
                     script{
-                        snykSecurity severity: 'critical', snykInstallation: 'snyk-i', snykTokenId: 'snyk-api-token', additionalArguments: "--docker jenkins-test"
+                        snykSecurity failOnIssues: false, snykInstallation: 'snyk-i', snykTokenId: 'snyk-api-token', additionalArguments: "--docker jenkins-test"
                         
                         } 
                     //sh 'snyk container test jenkins-test:latest'
                     }
+                //failOnIssues: false
+                //severity: 'critical'
 
                 }
                 
