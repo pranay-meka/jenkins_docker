@@ -3,7 +3,7 @@ agent any
 environment {
 AWS_REGION = 'ap-south-1'
 ACCOUNT_ID = '995757496665'
-REPO_NAME = 'my-docker-repo'
+REPO_NAME = 'pranay-docker-repo'
 REGISTRY = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}"
 IMAGE_TAG = "${BUILD_NUMBER}"
 CLUSTER_NAME = 'staging-demo'
