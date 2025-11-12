@@ -7,15 +7,51 @@ metadata:
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
-  matchLabels:
-    app: {{ include "my-java-app.name" . }}
+    matchLabels:
+      app: {{ include "my-java-app.fullname" . }}
   template:
     metadata:
       labels:
-        app: {{ include "my-java-app.name" . }}
+        app: {{ include "my-java-app.fullname" . }}
+      annotations:
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
     spec:
+      {{- if .Values.image.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range .Values.image.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
       containers:
-      - name: {{ .Chart.Name }}
-      image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-      ports:
-      - containerPort: {{ .Values.service.targetPort }}
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.targetPort }}
+          env:
+            {{- range .Values.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.path }}
+              port: {{ .Values.livenessProbe.port }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.path }}
+              port: {{ .Values.readinessProbe.port }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
