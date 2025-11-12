@@ -1,20 +1,58 @@
 replicaCount: 2
+
 image:
-  repository: <account-id>.dkr.ecr.<region>.amazonaws.com/pranay-docker-repo
-  tag: ""
+  repository: 995757496665.dkr.ecr.ap-south-1.amazonaws.com/pranay-docker-repo
+  tag: ""                # Jenkins will override this dynamically via --set image.tag
   pullPolicy: IfNotPresent
+  # imagePullSecrets: ["regcred"]   # Uncomment if your repo requires auth (ECR handles this via IAM)
+
 service:
   type: ClusterIP
   port: 5000
   targetPort: 5000
+
+resources: {}
+# Example (optional):
+# resources:
+#   requests:
+#     cpu: 100m
+#     memory: 256Mi
+#   limits:
+#     cpu: 500m
+#     memory: 512Mi
+
+env: []
+# Example:
+# env:
+#   - name: SPRING_PROFILES_ACTIVE
+#     value: "prod"
+
+livenessProbe:
+  enabled: true
+  path: /
+  port: 5000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  path: /
+  port: 5000
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
 ingress:
   enabled: true
   className: nginx
   annotations:
     kubernetes.io/ingress.class: nginx
   hosts:
-  - host: ""
-  paths:
-  - path: /
-    pathType: Prefix
-  tls: []
+  - host: a3f2ed102a1a24b3cbc992a7a48e5448-1538438363.ap-south-1.elb.amazonaws.com
+    paths:
+      - path: /
+        pathType: Prefix
+  tls: []  # Optional, add cert-manager or ACM configuration here
