@@ -1,0 +1,16 @@
+(contains reusable name and label templates)
+{{- define "my-java-app.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- define "my-java-app.fullname" -}}
+{{- printf "%s-%s" .Release.Name (default .Chart.Name .Values.nameOverride) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- define "my-java-app.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" -}}
+{{- end -}}
+{{- define "my-java-app.labels" -}}
+app.kubernetes.io/name: {{ include "my-java-app.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/version: {{ .Chart.AppVersion }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end -}}
