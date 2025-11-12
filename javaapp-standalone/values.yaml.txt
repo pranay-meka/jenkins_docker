@@ -1,6 +1,6 @@
 replicaCount: 2
 image:
- repository: <account-id>.dkr.ecr.<region>.amazonaws.com/my-docker-repo
+ repository: <account-id>.dkr.ecr.<region>.amazonaws.com/pranay-docker-repo
  tag: ""
  pullPolicy: IfNotPresent
 service:
@@ -18,3 +18,4 @@ ingress:
  - path: /
   pathType: Prefix
  tls: []
+
