@@ -1,0 +1,69 @@
+pipeline {
+agent any
+environment {
+AWS_REGION = 'ap-south-1'
+ACCOUNT_ID = ‘<account-id>’
+REPO_NAME = 'my-docker-repo'
+REGISTRY = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}"
+IMAGE_TAG = "${BUILD_NUMBER}"
+CLUSTER_NAME = 'demo-eks'
+NAMESPACE = 'helm-deployment'
+}
+stages {
+stage('Cloning Git') {
+steps {
+git branch: 'master', url: 'https://github.com/Vandu0409/jenkins.git'
+}
+}
+stage('Build Java App') {
+steps {
+dir('javaapp-standalone') {
+sh 'mvn clean package -DskipTests'
+}
+}
+}
+
+stage('Build Docker Image') {
+steps {
+dir('javaapp-standalone') {
+script {
+dockerImage = docker.build("${REGISTRY}:${IMAGE_TAG}", ".")
+}
+}
+}
+}
+stage('Push to ECR') {
+steps {
+script {
+sh """
+aws ecr get-login-password --region ${AWS_REGION} \
+| docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+docker push ${REGISTRY}:${IMAGE_TAG}
+"""
+}
+}
+}
+stage('Helm Deploy to EKS') {
+steps {
+script {
+sh """
+aws eks update-kubeconfig --region ${AWS_REGION} --name ${CLUSTER_NAME}
+helm upgrade --install my-java-app ./javaapp-standalone/chart/my-java-app \
+--namespace ${NAMESPACE} \
+--create-namespace \
+--set image.repository=${REGISTRY} \
+--set image.tag=${IMAGE_TAG}
+"""
+}
+}
+}
+}
+post {
+success {
+echo "✅ Deployment successful! Visit your LoadBalancer URL to access the app."
+}
+failure {
+echo "❌ Deployment failed — check logs."
+}
+}
+}
