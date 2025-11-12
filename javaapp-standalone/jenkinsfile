@@ -50,7 +50,7 @@ steps {
 script {
 sh """
 aws eks update-kubeconfig --region ${AWS_REGION} --name ${CLUSTER_NAME}
-helm upgrade --install my-java-app ./javaapp-standalone/ \
+helm upgrade --install my-java-app ./javaapp-standalone/chart/ \
 --namespace ${NAMESPACE} \
 --create-namespace \
 --set image.repository=${REGISTRY} \
