@@ -2,17 +2,17 @@ pipeline {
 agent any
 environment {
 AWS_REGION = 'ap-south-1'
-ACCOUNT_ID = ‘<account-id>’
+ACCOUNT_ID = ‘995757496665’
 REPO_NAME = 'my-docker-repo'
 REGISTRY = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}"
 IMAGE_TAG = "${BUILD_NUMBER}"
-CLUSTER_NAME = 'demo-eks'
+CLUSTER_NAME = 'staging-demo'
 NAMESPACE = 'helm-deployment'
 }
 stages {
 stage('Cloning Git') {
 steps {
-git branch: 'master', url: 'https://github.com/Vandu0409/jenkins.git'
+git branch: 'master', url: 'https://github.com/pranay-meka/jenkins_docker.git'
 }
 }
 stage('Build Java App') {
